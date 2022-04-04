@@ -5,9 +5,14 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Implementation1", "Implementation1\Implementation1.csproj", "{757D81F4-54FA-4CDA-9ADA-9AF1A3D44BA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementation1.Tests", "Implementation1.Tests\Implementation1.Tests.csproj", "{A2C5C52A-9C8F-4DE2-92D3-BE9FDDA9BB4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Implementation1.Tests", "Implementation1.Tests\Implementation1.Tests.csproj", "{A2C5C52A-9C8F-4DE2-92D3-BE9FDDA9BB4D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLibrary", "..\Shared\SharedLibrary\SharedLibrary.csproj", "{7CCE7FE8-F854-43AA-9C32-54C91A5FB857}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedLibrary", "..\Shared\SharedLibrary\SharedLibrary.csproj", "{7CCE7FE8-F854-43AA-9C32-54C91A5FB857}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F20F1763-FB9E-49C3-922C-271D92440501}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
