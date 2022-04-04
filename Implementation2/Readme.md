@@ -1,4 +1,4 @@
-### Implementation 2
+## Implementation 2
 
 Here we showcase 2 different approaches to SQL Server function/procedure testing:
 1. Database project + SSDT Unit Tests

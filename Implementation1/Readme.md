@@ -1,4 +1,4 @@
-### Implementation 1
+## Implementation 1
 
 Here we showcase 2 different implementations of the core "business logic":
 1. A divider that takes the requirements and implements them as they are

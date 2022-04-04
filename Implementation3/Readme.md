@@ -1,4 +1,4 @@
-### Implementation 3
+## Implementation 3
 
 Here we showcase 2 different approaches to client-server result streaming:
 1. Polling to a WebAPI endpoint
