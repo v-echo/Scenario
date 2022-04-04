@@ -1,0 +1,60 @@
+﻿@page "/fetchdata"
+
+<PageTitle>Generated Data</PageTitle>
+
+@using Implementation2.Web.Data
+@inject GeneratorService GeneratorService
+
+<h1>Data Fetch</h1>
+
+<p>This component demonstrates fetching data from the database. <b>The table updates on the (non-null) inputs losing focus.</b></p>
+
+@if (data == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <label>First name:</label>
+        <input type="text" @bind-value="first" @bind-value:event="oninput" @onchange="RefreshData" />
+
+        <label>Last name:</label>
+        <input type="text" @bind-value="last" @bind-value:event="oninput" @onchange="RefreshData" />
+
+        <label>Start counter:</label>
+        <input type="number" min="1" max="50000" step="1" @bind-value=start @bind-value:event="oninput" @onchange="RefreshData" />
+
+        <label>End counter:</label>
+        <input type="number" min="1" max="50000" step="1" @bind-value=end @bind-value:event="oninput" @onchange="RefreshData" />
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in data)
+            {
+                <tr>
+                    <td>@item.Number</td>
+                    <td>@item.Result</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<GeneratorData> data = new List<GeneratorData>();
+    private string? first, last;
+    private int start = 1, end = 100;
+
+    private void RefreshData()
+    {
+        if (!string.IsNullOrWhiteSpace(first) && !string.IsNullOrWhiteSpace(last))
+            data = GeneratorService.GetData(start, end, first, last);
+    }
+}

@@ -1,0 +1,158 @@
+﻿@page "/fetchdata"
+
+<PageTitle>Fetch API Data with SignalR</PageTitle>
+
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Text.Json
+@using SharedLibrary
+@implements IAsyncDisposable
+
+<h1>Fetch API Data with SignalR</h1>
+
+<p>This component demonstrates fetching data from an API through a persistent connection using SignalR.</p>
+
+@if (results == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm EditContext=context OnValidSubmit=Send>
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label>
+                First name:
+                <InputText @bind-Value=input.First class="form-control" />
+            </label>
+            <label>
+                Last name:
+                <InputText @bind-Value=input.Last class="form-control" />
+            </label>
+        </div>
+        <div>
+            <label>
+                Start counter:
+                <InputNumber @bind-Value=input.Start class="form-control" />
+            </label>
+            <label>
+                End counter:
+                <InputNumber @bind-Value=input.End class="form-control" />
+            </label>
+            <label>
+                Minimum delay:
+                <InputNumber @bind-Value=input.MinDelaySeconds class="form-control" />
+            </label>
+            <label>
+                Maximum delay:
+                <InputNumber @bind-Value=input.MaxDelaySeconds class="form-control" />
+            </label>
+        </div>
+        <br/>
+        <button type="submit" disabled="@(!CanRequestData)">Get Data</button>
+        <button type="button" disabled="@(!CanCloseConnection)" @onclick=CloseConnection>Close Connection</button>
+    </EditForm>
+    <br />
+    <div>
+        <p>Connection Status: <b class="red">@(connection?.State.ToString() ?? "Off")</b></p>
+        <p>Current Calculation: <b class="red">@CurrentStatus</b></p>
+        <p>Current Progress: <b class="red">@CurrentProgress%</b></p>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Result</th>
+                <th>Progress</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in results)
+            {
+                <tr>
+                    <td>@result.Status</td>
+                    <td>@result.Result</td>
+                    <td>@result.Progress%</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private HubConnection? connection;
+    private EditContext? context;
+    private List<StatusObject> results = new();
+    private CancellationTokenSource cts = new();
+    private CalculatorInput input = new(string.Empty, string.Empty);
+
+    private StatusType CurrentStatus;
+    private double CurrentProgress;
+
+    private bool CanRequestData => !string.IsNullOrWhiteSpace(input.First) && !string.IsNullOrWhiteSpace(input.Last);
+    private bool CanCloseConnection => connection?.State != HubConnectionState.Disconnected;
+
+    private async Task Send()
+    {
+        if (connection is not null)
+        {
+            results.Clear();
+            if (connection.State == HubConnectionState.Disconnected)
+                await connection.StartAsync();
+            await connection.SendAsync("StartSequence", JsonSerializer.Serialize(input), cts.Token);
+        }
+    }
+
+    private async Task CloseConnection()
+    {
+        if (connection is not null)
+        {
+            try
+            {
+                // Send the signal to the server to cancel processing
+                cts.Cancel();
+
+                // Wait for the connection to end gracefully
+                await connection.StopAsync();
+
+                // Reboot the CancellationTokenSource for re-use
+                cts.Dispose();
+                cts = new();
+
+                CurrentStatus = StatusType.Cancelled;
+            }
+            catch (Exception)
+            {
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = new(input);
+
+        connection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7276/calculator")
+            .Build();
+
+        connection.On<StatusObject>("ReceiveStatus", (status) =>
+        {
+            if (status.Status != StatusType.Started)
+                results.Add(status);
+            CurrentStatus = status.Status;
+            CurrentProgress = status.Progress;
+            StateHasChanged();
+        });
+
+        await connection.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (connection is not null)
+        {
+            await connection.DisposeAsync();
+        }
+    }
+}
